@@ -32,6 +32,20 @@ const complaintSchema = new mongoose.Schema({
   createdAt: {
     type: Date,
     default: Date.now
+  },
+  // New field for storing image data
+  image: {
+    type: Buffer,
+    required: false // Set to true if the image is required
+  },
+  // Optionally, store the content type of the image (e.g., "image/jpeg")
+  imageContentType: {
+    type: String,
+    required: false
+  },
+  houseNumber: {
+    type: String,
+    required: false // Not required for all complaints, only for house_related ones
   }
 });
 

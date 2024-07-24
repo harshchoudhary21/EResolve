@@ -137,6 +137,11 @@ const registerComplain = async (req, res) => {
         // Create a new complaint
         const complaintData = { title, description, userId: user._id, societyId: user.societyId, complaintType };
         if (houseNumber) complaintData.houseNumber = houseNumber; // Add houseNumber if provided
+
+        if (req.file) { // Assuming image is sent as 'file' in a multipart/form-data request
+          complaintData.image = req.file.buffer;
+          complaintData.imageContentType = req.file.mimetype;
+        }
         const complaint = new Complaint(complaintData);
         await complaint.save();
   
