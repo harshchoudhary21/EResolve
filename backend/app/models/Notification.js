@@ -1,42 +1,42 @@
 // models/Notification.js
 
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const notificationSchema = new mongoose.Schema({
   type: {
     type: String,
-    enum: ['complaint_registration', 'complaint_update'],
-    required: true
+    enum: ["complaint_registration", "complaint_update"],
+    required: true,
   },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
+    ref: "User",
+    required: true,
   },
   societyId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Society',
-    required: true
+    ref: "Society",
+    required: true,
   },
   complaintId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Complaint',
-    required: function() {
-      return this.type === 'complaint_update';
-    }
+    ref: "Complaint",
+    required: function () {
+      return this.type === "complaint_update";
+    },
   },
   message: {
     type: String,
-    required: true
+    required: true,
   },
   isRead: {
     type: Boolean,
-    default: false
+    default: false,
   },
   createdAt: {
     type: Date,
-    default: Date.now
-  }
+    default: Date.now,
+  },
 });
 
-module.exports = mongoose.model('Notification', notificationSchema);
+module.exports = mongoose.model("Notification", notificationSchema);

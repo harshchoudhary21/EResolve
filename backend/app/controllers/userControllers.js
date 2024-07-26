@@ -13,23 +13,25 @@ const housingModel = require('../models/housingModel');
 //Register a new user
 const registerUser = async (req, res) => {
   try {
-    const { email, password, role, phonenumber, societyId,houseNumber } = req.body;
+    const { name, email, password, role, phonenumber, societyId,houseNumber } = req.body;
     // Check if role is resident and societyId is not provided
     if (role === 'resident' && !societyId) {
       return res.status(400).json({ message: 'Society ID is required for resident role' });
     }
-    if(!houseNumber){
+    if(role === 'resident' && !houseNumber){
       return res.status(400).json({ message: 'House Number is required' });
     }
-    //Check if the house number is present in the society
-    const houseExists = await housingModel.findOne({ houseNumber, societyId });
-    if (!houseExists) {
-      return res.status(400).json({ message: 'House number does not exist in the society' });
-    }
 
+    if(role === 'resident') {
+      //Check if the house number is present in the society
+    const houseExists = await housingModel.findOne({ houseNumber, societyId });
+      if (!houseExists) {
+        return res.status(400).json({ message: 'House number does not exist in the society' });
+      }
+    }
+  
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-
    
     const isSecretary = role === 'secretary';
 
@@ -46,23 +48,64 @@ const registerUser = async (req, res) => {
 
 //Login a user
 const loginUser = async (req, res) => {
-    try {
-      const { email, password } = req.body;
-      const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(400).json({ message: 'Invalid credentials' });
-        }
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
-            return res.status(400).json({ message: 'Invalid credentials' });
-        }
-        const token = jwt.sign({ userId: user._id }, process.env.SECRET_KEY);
-        res.status(200).json({ token });
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: "Invalid credentials" });
     }
-    catch (error) {
-        res.status(400).json({ message: 'Error logging in' });
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid credentials" });
     }
-}
+    // Generate access token
+    const accessToken = jwt.sign(
+      { userId: user._id },
+      process.env.SECRET_KEY,
+      { expiresIn: "15m" }
+    );
+
+    // Generate refresh token
+    const refreshToken = jwt.sign(
+      { userId: user._id },
+      process.env.SECRET_KEY,
+      { expiresIn: "7d" }
+    );
+    res.status(200).json({ accessToken, refreshToken });
+  } catch (error) {
+    res.status(400).json({ message: "Error logging in" });
+  }
+};
+
+// Refresh access token
+const refreshAccessToken = async (req, res) => {
+  try {
+    const refreshToken = req.body.refreshToken;
+    if (!refreshToken) {
+      return res.status(401).json({ message: "No refresh token provided" });
+    }
+
+    // Verify refresh token
+    jwt.verify(refreshToken, process.env.SECRET_KEY, async (err, decoded) => {
+      if (err) {
+        return res.status(403).json({ message: "Invalid refresh token" });
+      }
+
+      const userId = decoded.userId;
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Generate new access token
+      const accessToken = jwt.sign({ userId: user._id }, process.env.SECRET_KEY, { expiresIn: "15m" });
+
+      res.status(200).json({ accessToken });
+    });
+  } catch (error) {
+    res.status(400).json({ message: "Error refreshing access token", error: error.message });
+  }
+};
 
 //Profile of a user
 const userProfile = async (req, res) => {
@@ -241,5 +284,6 @@ module.exports = {
     registerComplain,
     viewUserComplaints,
     receiveNotifications,
-    sendMessageToSecretaryForHouseChange
+    sendMessageToSecretaryForHouseChange,
+    refreshAccessToken
 }
