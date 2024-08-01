@@ -13,12 +13,12 @@ const housingModel = require('../models/housingModel');
 //Register a new user
 const registerUser = async (req, res) => {
   try {
-    const { email, password, role, phonenumber, societyId,houseNumber } = req.body;
+    const {email, name, password, role, phonenumber, societyId,houseNumber } = req.body;
     // Check if role is resident and societyId is not provided
     if (role === 'resident' && !societyId) {
       return res.status(400).json({ message: 'Society ID is required for resident role' });
     }
-    if(!houseNumber){
+    if(!houseNumber ){
       return res.status(400).json({ message: 'House Number is required' });
     }
     //Check if the house number is present in the society
