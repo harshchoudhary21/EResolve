@@ -2,13 +2,16 @@ const express = require('express');
 const router = express.Router();
 const Authentication  = require('../middlewares/auth');
 
-const { registerUser, loginUser, userProfile, updateUserProfile, updateUserPassword, deleteUser, registerComplain, viewUserComplaints, receiveNotifications, sendMessageToSecretaryForHouseChange } = require('../controllers/userControllers');
+const { registerUser, loginUser, userProfile, updateUserProfile, updateUserPassword, deleteUser, registerComplain, viewUserComplaints, receiveNotifications, sendMessageToSecretaryForHouseChange, refreshAccessToken } = require('../controllers/userControllers');
 
 // Register a new user
 router.post('/register', registerUser);
 
 // Login a user
 router.post('/login', loginUser);
+
+// Refresh accessToken
+router.post('/refresh-token', refreshAccessToken);
 
 // Get user profile (protected route)
 router.get('/profile',Authentication,  userProfile);

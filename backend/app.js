@@ -1,16 +1,11 @@
 const express = require('express');
 const app = express();
-const db = require('./app/config/db');
+const connectDB = require('./app/config/db');
 const adminRoutes = require('./app/routes/adminRoutes');
 const userRoutes = require('./app/routes/userRoutes');
+require("dotenv").config()
 
-db.connection.once('open', () => {
-    console.log('MongoDB connected');
-});
-
-db.connection.on('error', (err) => {
-    console.error(`MongoDB connection error: ${err}`);
-});
+connectDB()
 
 app.use(express.json()); // Add this line to enable JSON parsing
 

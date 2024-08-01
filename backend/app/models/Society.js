@@ -8,15 +8,28 @@ const societySchema = new mongoose.Schema({
     required: true
   },
   address: {
-    type: String,
-    required: true
+    local: {
+      type: String,
+      required: true
+    },
+    city: {
+      type: String,
+      required: true
+    },
+    state: {
+      type: String,
+      required: true
+    },
+    pincode: {
+      type: String,
+      required: true
+    }
   },
   secretaryId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
-  },
- 
+  }
 });
 
 module.exports = mongoose.model('Society', societySchema);
